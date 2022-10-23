@@ -12,6 +12,21 @@ metadata:
     app.kubernetes.io/component: kafka
 automountServiceAccountToken: true
 ---
+# Source: sa-final-project/charts/mongodb/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev-mongodb
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: mongodb
+    helm.sh/chart: mongodb-13.1.7
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+secrets:
+  - name: dev-mongodb
+automountServiceAccountToken: true
+---
 # Source: sa-final-project/charts/mysql/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -28,6 +43,34 @@ automountServiceAccountToken: true
 secrets:
   - name: dev-mysql
 ---
+# Source: sa-final-project/charts/vehicle-svc/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vehicle-svc-dev
+  labels:
+    helm.sh/chart: vehicle-svc-0.1.0
+    app.kubernetes.io/name: vehicle-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: sa-final-project/charts/mongodb/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dev-mongodb
+  namespace: default
+  labels:
+    app.kubernetes.io/name: mongodb
+    helm.sh/chart: mongodb-13.1.7
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: mongodb
+type: Opaque
+data:
+  mongodb-root-password: "R25oc2lwb1dIYTFCMjlENWpGV15UVGNVOGdZdFBnN15HU3Btbw=="
+---
 # Source: sa-final-project/charts/mysql/templates/secrets.yaml
 apiVersion: v1
 kind: Secret
@@ -42,7 +85,7 @@ metadata:
 type: Opaque
 data:
   mysql-root-password: "dTMyaXV3ZXVpdXdla2o="
-  mysql-password: "UjRPUlhYdEpQcw=="
+  mysql-password: "cUhEVlBPa2RkYQ=="
 ---
 # Source: sa-final-project/templates/jwt-secrets.yaml
 apiVersion: v1
@@ -53,6 +96,15 @@ data:
   JWT_PREFIX: NjI1NkIzRTVDRkMyQzk5Mw==
   JWT_SECRET: QEBUbDhRbkZZUzJXJkBLSmtCOWkzQyp0aHdIWCFtUFcxSjBORzJrWjVsNlNmNmo3JiE=
   JWT_ISSUER: ZWR1Lm1pdS5jczU5MA==
+---
+# Source: sa-final-project/templates/mongo-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dev-mongo-secrets-1
+data:
+  MONGODB_USERNAME: cm9vdA==
+  MONGODB_PASSWORD: R25oc2lwb1dIYTFCMjlENWpGV15UVGNVOGdZdFBnN15HU3Btbw==
 ---
 # Source: sa-final-project/templates/mysql-secrets.yaml
 apiVersion: v1
@@ -93,6 +145,39 @@ data:
     fi
 
     exec /entrypoint.sh /run.sh
+---
+# Source: sa-final-project/charts/mongodb/templates/common-scripts-cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-mongodb-common-scripts
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: mongodb
+    helm.sh/chart: mongodb-13.1.7
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: mongodb
+data:
+  startup-probe.sh: |
+    #!/bin/bash
+    mongosh  $TLS_OPTIONS --port $MONGODB_PORT_NUMBER --eval 'db.hello().isWritablePrimary || db.hello().secondary' | grep -q 'true$'
+  readiness-probe.sh: |
+    #!/bin/bash
+    # Run the proper check depending on the version
+    [[ $(mongod -version | grep "db version") =~ ([0-9]+\.[0-9]+\.[0-9]+) ]] && VERSION=${BASH_REMATCH[1]}
+    . /opt/bitnami/scripts/libversion.sh
+    VERSION_MAJOR="$(get_sematic_version "$VERSION" 1)"
+    VERSION_MINOR="$(get_sematic_version "$VERSION" 2)"
+    VERSION_PATCH="$(get_sematic_version "$VERSION" 3)"
+    if [[ ( "$VERSION_MAJOR" -ge 5 ) || ( "$VERSION_MAJOR" -ge 4 && "$VERSION_MINOR" -ge 4 && "$VERSION_PATCH" -ge 2 ) ]]; then
+        mongosh $TLS_OPTIONS --port $MONGODB_PORT_NUMBER --eval 'db.hello().isWritablePrimary || db.hello().secondary' | grep -q 'true$'
+    else
+        mongosh  $TLS_OPTIONS --port $MONGODB_PORT_NUMBER --eval 'db.isMaster().ismaster || db.isMaster().secondary' | grep -q 'true$'
+    fi
+  ping-mongodb.sh: |
+    #!/bin/bash
+    mongosh  $TLS_OPTIONS --port $MONGODB_PORT_NUMBER --eval "db.adminCommand('ping')"
 ---
 # Source: sa-final-project/charts/mysql/templates/primary/configmap.yaml
 apiVersion: v1
@@ -139,6 +224,15 @@ data:
     socket=/opt/bitnami/mysql/tmp/mysql.sock
     pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
 ---
+# Source: sa-final-project/templates/mongodb-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-mongodb-config-1
+data:
+  MONGODB_HOST: dev-mongodb
+  MONGODB_PORT: "27017"
+---
 # Source: sa-final-project/templates/mysql-config.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -147,6 +241,25 @@ metadata:
 data:
   MYSQL_DB_HOST: dev-mysql:3306
   APP_PROFILE: prod
+---
+# Source: sa-final-project/charts/mongodb/templates/standalone/pvc.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: dev-mongodb
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: mongodb
+    helm.sh/chart: mongodb-13.1.7
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: mongodb
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "8Gi"
 ---
 # Source: sa-final-project/charts/auth-svc/templates/service.yaml
 apiVersion: v1
@@ -289,6 +402,31 @@ spec:
     app.kubernetes.io/instance: dev
     app.kubernetes.io/component: kafka
 ---
+# Source: sa-final-project/charts/mongodb/templates/standalone/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-mongodb
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: mongodb
+    helm.sh/chart: mongodb-13.1.7
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: mongodb
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+    - name: "mongodb"
+      port: 27017
+      targetPort: mongodb
+      nodePort: null
+  selector:
+    app.kubernetes.io/name: mongodb
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/component: mongodb
+---
 # Source: sa-final-project/charts/mysql/templates/primary/svc-headless.yaml
 apiVersion: v1
 kind: Service
@@ -341,6 +479,28 @@ spec:
     app.kubernetes.io/instance: dev
     app.kubernetes.io/component: primary
 ---
+# Source: sa-final-project/charts/vehicle-svc/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: vehicle-svc-dev
+  labels:
+    helm.sh/chart: vehicle-svc-0.1.0
+    app.kubernetes.io/name: vehicle-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: vehicle-svc
+    app.kubernetes.io/instance: dev
+---
 # Source: sa-final-project/charts/auth-svc/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -381,14 +541,14 @@ spec:
             httpGet:
               path:  /
               port: 8088
-            initialDelaySeconds: 20
-            periodSeconds: 3
+            initialDelaySeconds: 60
+            periodSeconds: 60
           readinessProbe:
             httpGet:
               path:  /
               port: 8088
-            initialDelaySeconds: 20
-            periodSeconds: 3
+            initialDelaySeconds: 60
+            periodSeconds: 60
           envFrom:
             - secretRef:
                 name: dev-jwt-secrets-1
@@ -398,6 +558,177 @@ spec:
                 name: dev-mysql-config-1
             - configMapRef:
                 name: dev-auth-mysql-config-1
+          resources:
+            {}
+---
+# Source: sa-final-project/charts/mongodb/templates/standalone/dep-sts.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-mongodb
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: mongodb
+    helm.sh/chart: mongodb-13.1.7
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: mongodb
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+      app.kubernetes.io/instance: dev
+      app.kubernetes.io/component: mongodb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongodb
+        helm.sh/chart: mongodb-13.1.7
+        app.kubernetes.io/instance: dev
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: mongodb
+    spec:
+
+      serviceAccountName: dev-mongodb
+      affinity:
+        podAffinity:
+
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: mongodb
+                    app.kubernetes.io/instance: dev
+                    app.kubernetes.io/component: mongodb
+                namespaces:
+                  - "default"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+
+      securityContext:
+        fsGroup: 1001
+        sysctls: []
+
+      containers:
+        - name: mongodb
+          image: docker.io/bitnami/mongodb:6.0.2-debian-11-r1
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: MONGODB_ROOT_USER
+              value: "root"
+            - name: MONGODB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dev-mongodb
+                  key: mongodb-root-password
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "no"
+            - name: MONGODB_SYSTEM_LOG_VERBOSITY
+              value: "0"
+            - name: MONGODB_DISABLE_SYSTEM_LOG
+              value: "no"
+            - name: MONGODB_DISABLE_JAVASCRIPT
+              value: "no"
+            - name: MONGODB_ENABLE_JOURNAL
+              value: "yes"
+            - name: MONGODB_PORT_NUMBER
+              value: "27017"
+            - name: MONGODB_ENABLE_IPV6
+              value: "no"
+            - name: MONGODB_ENABLE_DIRECTORY_PER_DB
+              value: "no"
+          ports:
+            - name: mongodb
+              containerPort: 27017
+          livenessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 10
+            exec:
+              command:
+                - /bitnami/scripts/ping-mongodb.sh
+          readinessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bitnami/scripts/readiness-probe.sh
+          resources:
+            limits: {}
+            requests: {}
+          volumeMounts:
+            - name: datadir
+              mountPath: /bitnami/mongodb
+              subPath:
+            - name: common-scripts
+              mountPath: /bitnami/scripts
+      volumes:
+        - name: common-scripts
+          configMap:
+            name: dev-mongodb-common-scripts
+            defaultMode: 0550
+        - name: datadir
+          persistentVolumeClaim:
+            claimName: dev-mongodb
+---
+# Source: sa-final-project/charts/vehicle-svc/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vehicle-svc-dev
+  labels:
+    helm.sh/chart: vehicle-svc-0.1.0
+    app.kubernetes.io/name: vehicle-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vehicle-svc
+      app.kubernetes.io/instance: dev
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vehicle-svc
+        app.kubernetes.io/instance: dev
+    spec:
+      serviceAccountName: vehicle-svc-dev
+      securityContext:
+        {}
+      containers:
+        - name: vehicle-svc
+          securityContext:
+            {}
+          image: "ghcr.io/devbinod/sa-vehicle-service:main"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: dev-mongo-secrets-1
+            - secretRef:
+                name: dev-jwt-secrets-1
+            - configMapRef:
+                name: dev-mongodb-config-1
           resources:
             {}
 ---
@@ -911,7 +1242,6 @@ spec:
 # Source: sa-final-project/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
-
 metadata:
   name: sa-final-project-dev
   labels:
@@ -921,18 +1251,14 @@ metadata:
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
   annotations:
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_set_headers "Access-Control-Allow-Origin: $http_origin";
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/cors-allow-headers: Content-Type
-    nginx.ingress.kubernetes.io/cors-allow-methods: "POST, GET, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "http://rent-now.s3-website.us-east-2.amazonaws.com"
     ingress.kubernetes.io/enable-cors: "true"
-
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/cors-allow-headers: Content-Type
+    nginx.ingress.kubernetes.io/cors-allow-methods: POST, GET, OPTIONS
+    nginx.ingress.kubernetes.io/cors-allow-origin: http://rent-now.s3-website.us-east-2.amazonaws.com
 spec:
   rules:
-    - host:
+    - host :
       http:
         paths:
           - backend:
@@ -941,4 +1267,11 @@ spec:
                 port:
                   number: 80
             path: /api/auth
+            pathType: Prefix
+          - backend:
+              service:
+                name: vehicle-svc-dev
+                port:
+                  number: 80
+            path: /api/vehicles
             pathType: Prefix

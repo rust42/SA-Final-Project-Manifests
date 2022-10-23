@@ -38,18 +38,22 @@ spec:
             - name: http
               containerPort: {{ .Values.image.port }}
               protocol: TCP
+          {{- if .Values.image.liveness.enabled }}
           livenessProbe:
             httpGet:
               path:  {{ .Values.image.liveness.path }}
               port: {{ .Values.image.port }}
             initialDelaySeconds: {{ .Values.image.liveness.delay }}
             periodSeconds: {{ .Values.image.liveness.period }}
+            {{- end }}
+            {{- if .Values.image.readiness.enabled }}
           readinessProbe:
             httpGet:
               path:  {{ .Values.image.readiness.path }}
               port: {{ .Values.image.port }}
             initialDelaySeconds: {{ .Values.image.readiness.delay }}
             periodSeconds: {{ .Values.image.readiness.period }}
+            {{- end }}
           envFrom:
             {{- range .Values.secrets }}
             - secretRef:

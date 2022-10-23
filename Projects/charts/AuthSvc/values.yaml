@@ -11,13 +11,15 @@ image:
   tag: ""
   port: 8088
   liveness:
-    period: 3
-    delay: 20
+    enabled: true
+    period: 60
+    delay: 60
     path: /
 
   readiness:
-    period: 3
-    delay: 20
+    enabled: true
+    period: 60
+    delay: 60
     path: /
 
 imagePullSecrets: []

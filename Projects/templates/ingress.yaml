@@ -47,4 +47,12 @@ spec:
                   number: 80
             path: /api/auth
             pathType: Prefix
+          - backend:
+              service:
+                name: vehicle-svc-{{ .Release.Name }}
+                port:
+                  number: 80
+            path: /api/vehicles
+            pathType: Prefix
+
 {{- end }}

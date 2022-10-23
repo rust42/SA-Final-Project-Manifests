@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "AuthSvc.fullname" . }}
+  name: {{ include "VehicleSvc.fullname" . }}
   labels:
-    {{- include "AuthSvc.labels" . | nindent 4 }}
+    {{- include "VehicleSvc.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "AuthSvc.selectorLabels" . | nindent 6 }}
+      {{- include "VehicleSvc.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,13 +19,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "AuthSvc.selectorLabels" . | nindent 8 }}
+        {{- include "VehicleSvc.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "AuthSvc.serviceAccountName" . }}
+      serviceAccountName: {{ include "VehicleSvc.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -38,18 +38,22 @@ spec:
             - name: http
               containerPort: {{ .Values.image.port }}
               protocol: TCP
+          {{- if .Values.image.liveness.enabled }}
           livenessProbe:
             httpGet:
               path:  {{ .Values.image.liveness.path }}
               port: {{ .Values.image.port }}
             initialDelaySeconds: {{ .Values.image.liveness.delay }}
             periodSeconds: {{ .Values.image.liveness.period }}
+            {{- end }}
+            {{- if .Values.image.readiness.enabled }}
           readinessProbe:
             httpGet:
               path:  {{ .Values.image.readiness.path }}
               port: {{ .Values.image.port }}
             initialDelaySeconds: {{ .Values.image.readiness.delay }}
             periodSeconds: {{ .Values.image.readiness.period }}
+            {{- end }}
           envFrom:
             {{- range .Values.secrets }}
             - secretRef:

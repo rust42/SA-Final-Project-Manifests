@@ -5,10 +5,23 @@
 replicaCount: 1
 
 image:
-  repository: nginx
-  pullPolicy: IfNotPresent
+  repository: ghcr.io/devbinod/sa-vehicle-service:main
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
+  port: 8080
+  liveness:
+    period: 60
+    delay: 60
+    path: /
+    enabled: true
+
+  readiness:
+    period: 60
+    delay: 60
+    path: /
+    enabled: true
+
 
 imagePullSecrets: []
 nameOverride: ""
@@ -84,5 +97,5 @@ affinity: {}
 secrets:
   - mongo-secrets
   - jwt-secrets
-configmaps:
+configMaps:
   - mongodb-config
