@@ -50,6 +50,8 @@ ingress:
       paths:
         - path: /api/auth
           pathType: Prefix
+          name: auth-svc-dev
+          port: 80
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local

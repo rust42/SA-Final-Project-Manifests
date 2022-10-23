@@ -86,7 +86,10 @@ affinity: {}
 secrets:
   - jwt-secrets
   - mysql-secrets
-  - mysql-config
 
-configMap:
-  - maps
+configMaps:
+  - mysql-config
+  - auth-mysql-config
+
+mysql:
+  database: AuthDB

@@ -4,5 +4,4 @@ metadata:
   name: {{ .Release.Name }}-mysql-config-{{ .Release.Revision }}
 data:
   MYSQL_DB_HOST: {{ .Release.Name }}-{{ .Values.mysql.dbHost }}
-  MYSQL_DB_NAME: {{ .Values.mysql.database }}
   APP_PROFILE: {{ default "dev" .Values.app.activeProfile }}

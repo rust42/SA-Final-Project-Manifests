@@ -1,5 +1,5 @@
 ---
-# Source: auth-svc/charts/mysql/templates/serviceaccount.yaml
+# Source: sa-final-project/charts/mysql/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -15,7 +15,7 @@ automountServiceAccountToken: true
 secrets:
   - name: dev-mysql
 ---
-# Source: auth-svc/charts/mysql/templates/secrets.yaml
+# Source: sa-final-project/charts/mysql/templates/secrets.yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -29,21 +29,36 @@ metadata:
 type: Opaque
 data:
   mysql-root-password: "dTMyaXV3ZXVpdXdla2o="
-  mysql-password: "WWEwZzdZQXpINg=="
+  mysql-password: "eDhlaUI1d0Q2Qg=="
 ---
-# Source: auth-svc/templates/secret.yaml
+# Source: sa-final-project/templates/jwt-secrets.yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: dev-secrets-1
+  name: dev-jwt-secrets-1
 data:
-  MYSQL_PASSWORD: dTMyaXV3ZXVpdXdla2o=
-  MYSQL_USER: cm9vdA==
   JWT_PREFIX: NjI1NkIzRTVDRkMyQzk5Mw==
   JWT_SECRET: QEBUbDhRbkZZUzJXJkBLSmtCOWkzQyp0aHdIWCFtUFcxSjBORzJrWjVsNlNmNmo3JiE=
   JWT_ISSUER: ZWR1Lm1pdS5jczU5MA==
 ---
-# Source: auth-svc/charts/mysql/templates/primary/configmap.yaml
+# Source: sa-final-project/templates/mysql-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dev-mysql-secrets-1
+data:
+  MYSQL_PASSWORD: dTMyaXV3ZXVpdXdla2o=
+  MYSQL_USER: cm9vdA==
+---
+# Source: sa-final-project/charts/auth-svc/templates/auth-mysql-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-auth-mysql-config-1
+data:
+  MYSQL_DB_NAME: AuthDB
+---
+# Source: sa-final-project/charts/mysql/templates/primary/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -88,18 +103,38 @@ data:
     socket=/opt/bitnami/mysql/tmp/mysql.sock
     pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
 ---
-# Source: auth-svc/templates/config.yaml
+# Source: sa-final-project/templates/mysql-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-maps-1
+  name: dev-mysql-config-1
 data:
   MYSQL_DB_HOST: dev-mysql:3306
-  SPRING_PROFILES_ACTIVE: prod
-  MYSQL_DB_NAME: UserServiceDB
   APP_PROFILE: prod
 ---
-# Source: auth-svc/charts/mysql/templates/primary/svc-headless.yaml
+# Source: sa-final-project/charts/auth-svc/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-svc-dev
+  labels:
+    helm.sh/chart: auth-svc-0.1.0
+    app.kubernetes.io/name: auth-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8088
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: auth-svc
+    app.kubernetes.io/instance: dev
+---
+# Source: sa-final-project/charts/mysql/templates/primary/svc-headless.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -124,7 +159,7 @@ spec:
     app.kubernetes.io/instance: dev
     app.kubernetes.io/component: primary
 ---
-# Source: auth-svc/charts/mysql/templates/primary/svc.yaml
+# Source: sa-final-project/charts/mysql/templates/primary/svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -151,29 +186,7 @@ spec:
     app.kubernetes.io/instance: dev
     app.kubernetes.io/component: primary
 ---
-# Source: auth-svc/templates/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: auth-svc-dev
-  labels:
-    helm.sh/chart: auth-svc-0.1.0
-    app.kubernetes.io/name: auth-svc
-    app.kubernetes.io/instance: dev
-    app.kubernetes.io/version: "1.16.0"
-    app.kubernetes.io/managed-by: Helm
-spec:
-  type: ClusterIP
-  ports:
-    - port: 80
-      targetPort: 8088
-      protocol: TCP
-      name: http
-  selector:
-    app.kubernetes.io/name: auth-svc
-    app.kubernetes.io/instance: dev
----
-# Source: auth-svc/templates/deployment.yaml
+# Source: sa-final-project/charts/auth-svc/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -223,13 +236,17 @@ spec:
             periodSeconds: 3
           envFrom:
             - secretRef:
-                name: dev-secrets-1
+                name: dev-jwt-secrets-1
+            - secretRef:
+                name: dev-mysql-secrets-1
             - configMapRef:
-                name: dev-maps-1
+                name: dev-mysql-config-1
+            - configMapRef:
+                name: dev-auth-mysql-config-1
           resources:
             {}
 ---
-# Source: auth-svc/charts/mysql/templates/primary/statefulset.yaml
+# Source: sa-final-project/charts/mysql/templates/primary/statefulset.yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -381,14 +398,14 @@ spec:
           requests:
             storage: "8Gi"
 ---
-# Source: auth-svc/templates/ingress.yaml
+# Source: sa-final-project/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: auth-svc-dev
+  name: sa-final-project-dev
   labels:
-    helm.sh/chart: auth-svc-0.1.0
-    app.kubernetes.io/name: auth-svc
+    helm.sh/chart: sa-final-project-0.1.0
+    app.kubernetes.io/name: sa-final-project
     app.kubernetes.io/instance: dev
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
@@ -397,10 +414,10 @@ spec:
     - host:
       http:
         paths:
-          - path: /api/auth
-            pathType: Prefix
-            backend:
+          - backend:
               service:
                 name: auth-svc-dev
                 port:
                   number: 80
+            path: /api/auth
+            pathType: Prefix
