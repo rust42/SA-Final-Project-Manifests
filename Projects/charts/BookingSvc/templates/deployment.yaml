@@ -15,6 +15,7 @@ spec:
     metadata:
       {{- with .Values.podAnnotations }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -31,20 +32,33 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: {{ .Values.image.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
-              port: http
+              path:  {{ .Values.image.liveness.path }}
+              port: {{ .Values.image.port }}
+            initialDelaySeconds: {{ .Values.image.liveness.delay }}
+            periodSeconds: {{ .Values.image.liveness.period }}
           readinessProbe:
             httpGet:
-              path: /
-              port: http
+              path:  {{ .Values.image.readiness.path }}
+              port: {{ .Values.image.port }}
+            initialDelaySeconds: {{ .Values.image.readiness.delay }}
+            periodSeconds: {{ .Values.image.readiness.period }}
+          envFrom:
+            {{- range .Values.secrets }}
+            - secretRef:
+                name: {{ $.Release.Name }}-{{ . }}-{{ $.Release.Revision }}
+            {{- end }}
+            {{- range .Values.configMaps }}
+            - configMapRef:
+                name: {{ $.Release.Name }}-{{ . }}-{{ $.Release.Revision }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

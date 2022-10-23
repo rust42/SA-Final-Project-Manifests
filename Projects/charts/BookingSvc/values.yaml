@@ -9,6 +9,16 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
+  liveness:
+    period: 3
+    delay: 20
+    path: /
+
+  readiness:
+    period: 3
+    delay: 20
+    path: /
+
 
 imagePullSecrets: []
 nameOverride: ""
@@ -80,3 +90,23 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+mysql:
+  auth:
+    rootPassword: u32iuweuiuwekj
+  username: root
+  dbHost: mysql:3306
+
+app:
+  activeProfile: prod
+
+jwt:
+  prefix: "6256B3E5CFC2C993"
+  secret: "@@Tl8QnFYS2W&@KJkB9i3C*thwHX!mPW1J0NG2kZ5l6Sf6j7&!"
+  issuer: edu.miu.cs590
+
+secrets:
+  - secret
+
+configMap:
+  - maps
