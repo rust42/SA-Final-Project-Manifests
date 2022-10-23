@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-mongodb-config-{{ .Release.Revision }}
+data:
+  MONDODB_HOST: {{ .Release.Name }}-{{ .Values.mongodb.dbHost }}
+  MONGODB_PORT: {{ .Values.mongodb.dbPort }}
