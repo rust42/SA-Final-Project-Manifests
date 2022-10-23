@@ -409,6 +409,13 @@ metadata:
     app.kubernetes.io/instance: dev
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
+
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/cors-allow-headers: Content-Type
+    nginx.ingress.kubernetes.io/cors-allow-methods: "POST, GET, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    ingress.kubernetes.io/enable-cors: "true"
 spec:
   rules:
     - host:
