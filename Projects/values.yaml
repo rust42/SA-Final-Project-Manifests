@@ -97,3 +97,5 @@ services:
   auth: auth-svc
   booking: booking-svc
   email: email-svc
+  review: review-svc
+  payment: payment-svc

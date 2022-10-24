@@ -3,8 +3,9 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-services-config-{{ .Release.Revision }}
 data:
-  VEHICLE_SERVICE: {{ .Values.services.vehicle }}-{{ .Release.Name }}
-  AUTH_SERVICE: {{ .Values.services.auth }}-{{ .Release.Name }}
-  BOOKING_SERVICE:  {{ .Values.services.booking }}-{{ .Release.Name }}
-  EMAIL_SERVICE: {{ .Values.services.email }}-{{ .Release.Name }}
-
+  VEHICLE_SERVICE: {{ .Values.services.vehicle }}-{{ .Release.Name }}/api/vehicles
+  AUTH_SERVICE: {{ .Values.services.auth }}-{{ .Release.Name }}/api/auth
+  BOOKING_SERVICE:  {{ .Values.services.booking }}-{{ .Release.Name }}/api/bookings
+  EMAIL_SERVICE: {{ .Values.services.email }}-{{ .Release.Name }}/api/notifications
+  PAYMENT_SERVICE: {{ .Values.services.payment }}-{{ .Release.Name }}/api/payments
+  REVIEW_SERVICE: {{ .Values.services.review }}-{{ .Release.Name }}/api/reviews

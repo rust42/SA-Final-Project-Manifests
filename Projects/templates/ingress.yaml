@@ -85,9 +85,12 @@ spec:
                   number: 80
             path: /api/reviews
             pathType: Prefix
-
-
-
-
+          - backend:
+              service:
+                name: payment-svc-{{ .Release.Name }}
+                port:
+                  number: 80
+            path: /api/payments
+            pathType: Prefix
 
 {{- end }}
