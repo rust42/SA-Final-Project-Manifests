@@ -105,6 +105,7 @@ configMaps:
   - profile-config
   - services-config
   - kafka-config
+  - zipkin-config
 
 mysql:
   database: BookingDB

@@ -101,3 +101,4 @@ configMaps:
   - mongodb-config
   - profile-config
   - services-config
+  - zipkin-config

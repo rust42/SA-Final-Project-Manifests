@@ -93,6 +93,7 @@ configMaps:
   - mysql-config
   - auth-mysql-config
   - profile-config
+  - zipkin-config
 
 mysql:
   database: AuthDB
