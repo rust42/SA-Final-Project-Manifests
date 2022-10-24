@@ -62,5 +62,14 @@ spec:
             path: /api/bookings
             pathType: Prefix
 
+          - backend:
+              service:
+                name: {{ .Release.Name }}-zipkin
+                port:
+                  number: 9411
+            path: /zipkin
+            pathType: Prefix
+
+
 
 {{- end }}
