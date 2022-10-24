@@ -68,6 +68,18 @@ metadata:
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 ---
+# Source: sa-final-project/charts/zipkin/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dev-zipkin
+  labels:
+    helm.sh/chart: zipkin-0.1.0
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+---
 # Source: sa-final-project/charts/mongodb/templates/secrets.yaml
 apiVersion: v1
 kind: Secret
@@ -98,7 +110,7 @@ metadata:
 type: Opaque
 data:
   mysql-root-password: "dTMyaXV3ZXVpdXdla2o="
-  mysql-password: "M3NaYjE5cDRySw=="
+  mysql-password: "TTVEdjc3QTlrVQ=="
 ---
 # Source: sa-final-project/templates/jwt-secrets.yaml
 apiVersion: v1
@@ -573,6 +585,28 @@ spec:
     app.kubernetes.io/name: vehicle-svc
     app.kubernetes.io/instance: dev
 ---
+# Source: sa-final-project/charts/zipkin/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-zipkin
+  labels:
+    helm.sh/chart: zipkin-0.1.0
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9411
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/instance: dev
+---
 # Source: sa-final-project/charts/auth-svc/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -875,6 +909,53 @@ spec:
                 name: dev-profile-config-1
             - configMapRef:
                 name: dev-services-config-1
+          resources:
+            {}
+---
+# Source: sa-final-project/charts/zipkin/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-zipkin
+  labels:
+    helm.sh/chart: zipkin-0.1.0
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: zipkin
+      app.kubernetes.io/instance: dev
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: zipkin
+        app.kubernetes.io/instance: dev
+    spec:
+      serviceAccountName: dev-zipkin
+      securityContext:
+        {}
+      containers:
+        - name: zipkin
+          securityContext:
+            {}
+          image: ghcr.io/openzipkin/zipkin:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 9411
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: "/health"
+              port: 9411
+          readinessProbe:
+            httpGet:
+              path: "/health"
+              port: 9411
           resources:
             {}
 ---
@@ -1427,4 +1508,12 @@ spec:
                 port:
                   number: 80
             path: /api/bookings
+            pathType: Prefix
+
+          - backend:
+              service:
+                name: dev-zipkin
+                port:
+                  number: 9411
+            path: /zipkin
             pathType: Prefix
