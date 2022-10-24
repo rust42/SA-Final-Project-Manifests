@@ -78,6 +78,15 @@ spec:
             path: /api/notifications
             pathType: Prefix
 
+          - backend:
+              service:
+                name: review-svc-{{ .Release.Name }}
+                port:
+                  number: 80
+            path: /api/reviews
+            pathType: Prefix
+
+
 
 
 
