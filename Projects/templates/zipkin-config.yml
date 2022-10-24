@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-zipkin-config-{{ .Release.Revision }}
 data:
-  ZIPKIN_SERVER_URL: {{ .Release.Name }}-{{ .Values.kafka.hostAddress }}:9092
+  ZIPKIN_SERVER_URL: {{ .Release.Name }}-zipkin:9411

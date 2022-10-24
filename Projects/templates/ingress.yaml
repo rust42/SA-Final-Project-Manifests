@@ -37,7 +37,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    - host :
+    - host:
       http:
         paths:
           - backend:
@@ -69,6 +69,15 @@ spec:
                   number: 9411
             path: /zipkin
             pathType: Prefix
+
+          - backend:
+              service:
+                name: email-svc-{{ .Release.Name }}
+                port:
+                  number: 8080
+            path: /api/notifications
+            pathType: Prefix
+
 
 
 

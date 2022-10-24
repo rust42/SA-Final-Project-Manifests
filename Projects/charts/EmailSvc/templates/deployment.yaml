@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "EmailSvc.fullname" . }}
+  labels:
+    {{- include "EmailSvc.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "EmailSvc.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "EmailSvc.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "EmailSvc.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.image.port }}
+              protocol: TCP
+          {{- if .Values.image.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path:  {{ .Values.image.liveness.path }}
+              port: {{ .Values.image.port }}
+            initialDelaySeconds: {{ .Values.image.liveness.delay }}
+            periodSeconds: {{ .Values.image.liveness.period }}
+            {{- end }}
+            {{- if .Values.image.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+              path:  {{ .Values.image.readiness.path }}
+              port: {{ .Values.image.port }}
+            initialDelaySeconds: {{ .Values.image.readiness.delay }}
+            periodSeconds: {{ .Values.image.readiness.period }}
+            {{- end }}
+          envFrom:
+            {{- range .Values.secrets }}
+            - secretRef:
+                name: {{ $.Release.Name }}-{{ . }}-{{ $.Release.Revision }}
+            {{- end }}
+            {{- range .Values.configMaps }}
+            - configMapRef:
+                name: {{ $.Release.Name }}-{{ . }}-{{ $.Release.Revision }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
