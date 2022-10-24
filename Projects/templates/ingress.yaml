@@ -54,5 +54,13 @@ spec:
                   number: 80
             path: /api/vehicles
             pathType: Prefix
+          - backend:
+              service:
+                name: booking-svc-{{ .Release.Name }}
+                port:
+                  number: 80
+            path: /api/bookings
+            pathType: Prefix
+
 
 {{- end }}

@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/rust42/sample-test-build:main
+  repository: ghcr.io/rust42/sa-user-service:main
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -92,6 +92,7 @@ secrets:
 configMaps:
   - mysql-config
   - auth-mysql-config
+  - profile-config
 
 mysql:
   database: AuthDB

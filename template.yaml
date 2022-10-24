@@ -1,4 +1,16 @@
 ---
+# Source: sa-final-project/charts/booking-svc/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: booking-svc-dev
+  labels:
+    helm.sh/chart: booking-svc-0.1.0
+    app.kubernetes.io/name: booking-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+---
 # Source: sa-final-project/charts/kafka/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -48,6 +60,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: vehicle-svc-dev
+
   labels:
     helm.sh/chart: vehicle-svc-0.1.0
     app.kubernetes.io/name: vehicle-svc
@@ -85,7 +98,7 @@ metadata:
 type: Opaque
 data:
   mysql-root-password: "dTMyaXV3ZXVpdXdla2o="
-  mysql-password: "cUhEVlBPa2RkYQ=="
+  mysql-password: "M3NaYjE5cDRySw=="
 ---
 # Source: sa-final-project/templates/jwt-secrets.yaml
 apiVersion: v1
@@ -122,6 +135,14 @@ metadata:
   name: dev-auth-mysql-config-1
 data:
   MYSQL_DB_NAME: AuthDB
+---
+# Source: sa-final-project/charts/booking-svc/templates/booking-svc-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-booking-svc-config-1
+data:
+  MYSQL_DB_NAME: BookingDB
 ---
 # Source: sa-final-project/charts/kafka/templates/scripts-configmap.yaml
 apiVersion: v1
@@ -224,6 +245,14 @@ data:
     socket=/opt/bitnami/mysql/tmp/mysql.sock
     pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
 ---
+# Source: sa-final-project/templates/kafka-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-kafka-config-1
+data:
+  KAFKA_SERVER_URL: dev-kafka:9092
+---
 # Source: sa-final-project/templates/mongodb-config.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -241,6 +270,26 @@ metadata:
 data:
   MYSQL_DB_HOST: dev-mysql:3306
   APP_PROFILE: prod
+---
+# Source: sa-final-project/templates/profile-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-profile-config-1
+data:
+  APP_PROFILE: prod
+  SPRING_PROFILES_ACTIVE: prod
+---
+# Source: sa-final-project/templates/services-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-services-config-1
+data:
+  VEHICLE_SERVICE: vehicle-svc-dev
+  AUTH_SERVICE: auth-svc-dev
+  BOOKING_SERVICE:  booking-svc-dev
+  EMAIL_SERVICE: email-svc-dev
 ---
 # Source: sa-final-project/charts/mongodb/templates/standalone/pvc.yaml
 kind: PersistentVolumeClaim
@@ -281,6 +330,28 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: auth-svc
+    app.kubernetes.io/instance: dev
+---
+# Source: sa-final-project/charts/booking-svc/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-svc-dev
+  labels:
+    helm.sh/chart: booking-svc-0.1.0
+    app.kubernetes.io/name: booking-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: booking-svc
     app.kubernetes.io/instance: dev
 ---
 # Source: sa-final-project/charts/kafka/charts/zookeeper/templates/svc-headless.yaml
@@ -484,6 +555,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: vehicle-svc-dev
+
   labels:
     helm.sh/chart: vehicle-svc-0.1.0
     app.kubernetes.io/name: vehicle-svc
@@ -531,7 +603,7 @@ spec:
         - name: auth-svc
           securityContext:
             {}
-          image: "ghcr.io/rust42/sample-test-build:main"
+          image: "ghcr.io/rust42/sa-user-service:main"
           imagePullPolicy: Always
           ports:
             - name: http
@@ -558,6 +630,74 @@ spec:
                 name: dev-mysql-config-1
             - configMapRef:
                 name: dev-auth-mysql-config-1
+            - configMapRef:
+                name: dev-profile-config-1
+          resources:
+            {}
+---
+# Source: sa-final-project/charts/booking-svc/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-svc-dev
+  labels:
+    helm.sh/chart: booking-svc-0.1.0
+    app.kubernetes.io/name: booking-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: booking-svc
+      app.kubernetes.io/instance: dev
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: booking-svc
+        app.kubernetes.io/instance: dev
+    spec:
+      serviceAccountName: booking-svc-dev
+      securityContext:
+        {}
+      containers:
+        - name: booking-svc
+          securityContext:
+            {}
+          image: "ghcr.io/devbinod/sa-booking-detail-service:main"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path:  /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path:  /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          envFrom:
+            - secretRef:
+                name: dev-jwt-secrets-1
+            - secretRef:
+                name: dev-mysql-secrets-1
+            - configMapRef:
+                name: dev-mysql-config-1
+            - configMapRef:
+                name: dev-booking-svc-config-1
+            - configMapRef:
+                name: dev-profile-config-1
+            - configMapRef:
+                name: dev-services-config-1
+            - configMapRef:
+                name: dev-kafka-config-1
           resources:
             {}
 ---
@@ -691,6 +831,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vehicle-svc-dev
+
   labels:
     helm.sh/chart: vehicle-svc-0.1.0
     app.kubernetes.io/name: vehicle-svc
@@ -710,6 +851,7 @@ spec:
         app.kubernetes.io/instance: dev
     spec:
       serviceAccountName: vehicle-svc-dev
+
       securityContext:
         {}
       containers:
@@ -729,6 +871,10 @@ spec:
                 name: dev-jwt-secrets-1
             - configMapRef:
                 name: dev-mongodb-config-1
+            - configMapRef:
+                name: dev-profile-config-1
+            - configMapRef:
+                name: dev-services-config-1
           resources:
             {}
 ---
@@ -1274,4 +1420,11 @@ spec:
                 port:
                   number: 80
             path: /api/vehicles
+            pathType: Prefix
+          - backend:
+              service:
+                name: booking-svc-dev
+                port:
+                  number: 80
+            path: /api/bookings
             pathType: Prefix

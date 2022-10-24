@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-services-config-{{ .Release.Revision }}
+data:
+  VEHICLE_SERVICE: {{ .Values.services.vehicle }}-{{ .Release.Name }}
+  AUTH_SERVICE: {{ .Values.services.auth }}-{{ .Release.Name }}
+  BOOKING_SERVICE:  {{ .Values.services.booking }}-{{ .Release.Name }}
+  EMAIL_SERVICE: {{ .Values.services.email }}-{{ .Release.Name }}
+

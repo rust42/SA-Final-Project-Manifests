@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-profile-config-{{ .Release.Revision }}
+data:
+  APP_PROFILE: {{ default "prod" .Values.app.activeProfile }}
+  SPRING_PROFILES_ACTIVE: {{ default "prod" .Values.app.activeProfile }}
