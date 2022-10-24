@@ -64,7 +64,7 @@ spec:
 
           - backend:
               service:
-                name: {{ .Release.Name }}-zipkin
+                name: zipkin-{{ .Release.Name }}
                 port:
                   number: 9411
             path: /zipkin
@@ -74,7 +74,7 @@ spec:
               service:
                 name: email-svc-{{ .Release.Name }}
                 port:
-                  number: 8080
+                  number: 80
             path: /api/notifications
             pathType: Prefix
 

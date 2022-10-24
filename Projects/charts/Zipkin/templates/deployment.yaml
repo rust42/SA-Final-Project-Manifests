@@ -39,11 +39,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: "/zipkin/health"
+              path: "/health"
               port: 9411
           readinessProbe:
             httpGet:
-              path: "/zipkin/health"
+              path: "/health"
               port: 9411
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
