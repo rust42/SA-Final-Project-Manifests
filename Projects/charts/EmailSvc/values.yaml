@@ -82,3 +82,4 @@ affinity: {}
 configMaps:
   - profile-config
   - zipkin-config
+  - kafka-config

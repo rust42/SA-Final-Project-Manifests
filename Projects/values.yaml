@@ -73,6 +73,11 @@ kafka:
   replicaCount: 3
   externalZookeeper: zookeeper
 
+redis:
+  host: redis-master
+  auth:
+    enabled: false
+
 mongodb:
   auth:
     rootUser: root

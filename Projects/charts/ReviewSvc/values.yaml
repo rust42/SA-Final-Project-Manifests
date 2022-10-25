@@ -86,3 +86,4 @@ configMaps:
   - mongodb-config
   - profile-config
   - zipkin-config
+  - redis-config
