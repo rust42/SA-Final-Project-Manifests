@@ -67,6 +67,43 @@ automountServiceAccountToken: true
 secrets:
   - name: dev-mysql
 ---
+# Source: sa-final-project/charts/payment-svc/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: payment-svc-dev
+  labels:
+    helm.sh/chart: payment-svc-0.1.0
+    app.kubernetes.io/name: payment-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: sa-final-project/charts/redis/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: true
+metadata:
+  name: dev-redis
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-15.7.0
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: sa-final-project/charts/review-svc/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: review-svc-dev
+  labels:
+    helm.sh/chart: review-svc-0.1.0
+    app.kubernetes.io/name: review-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+---
 # Source: sa-final-project/charts/vehicle-svc/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -84,7 +121,7 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: dev-zipkin
+  name: zipkin-dev
   labels:
     helm.sh/chart: zipkin-0.1.0
     app.kubernetes.io/name: zipkin
@@ -122,7 +159,7 @@ metadata:
 type: Opaque
 data:
   mysql-root-password: "dTMyaXV3ZXVpdXdla2o="
-  mysql-password: "WWY2dDZXU043Tw=="
+  mysql-password: "NEFpeFA5ZXdSSg=="
 ---
 # Source: sa-final-project/templates/jwt-secrets.yaml
 apiVersion: v1
@@ -269,6 +306,205 @@ data:
     socket=/opt/bitnami/mysql/tmp/mysql.sock
     pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
 ---
+# Source: sa-final-project/charts/redis/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-redis-configuration
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-15.7.0
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+data:
+  redis.conf: |-
+    # User-supplied common configuration:
+    # Enable AOF https://redis.io/topics/persistence#append-only-file
+    appendonly yes
+    # Disable RDB persistence, AOF persistence already enabled.
+    save ""
+    # End of common configuration
+  master.conf: |-
+    dir /data
+    # User-supplied master configuration:
+    rename-command FLUSHDB ""
+    rename-command FLUSHALL ""
+    # End of master configuration
+  replica.conf: |-
+    dir /data
+    slave-read-only yes
+    # User-supplied replica configuration:
+    rename-command FLUSHDB ""
+    rename-command FLUSHALL ""
+    # End of replica configuration
+---
+# Source: sa-final-project/charts/redis/templates/health-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-redis-health
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-15.7.0
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+data:
+  ping_readiness_local.sh: |-
+    #!/bin/bash
+
+    [[ -f $REDIS_PASSWORD_FILE ]] && export REDIS_PASSWORD="$(< "${REDIS_PASSWORD_FILE}")"
+    [[ -n "$REDIS_PASSWORD" ]] && export REDISCLI_AUTH="$REDIS_PASSWORD"
+    response=$(
+      timeout -s 3 $1 \
+      redis-cli \
+        -h localhost \
+        -p $REDIS_PORT \
+        ping
+    )
+    if [ "$response" != "PONG" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_liveness_local.sh: |-
+    #!/bin/bash
+
+    [[ -f $REDIS_PASSWORD_FILE ]] && export REDIS_PASSWORD="$(< "${REDIS_PASSWORD_FILE}")"
+    [[ -n "$REDIS_PASSWORD" ]] && export REDISCLI_AUTH="$REDIS_PASSWORD"
+    response=$(
+      timeout -s 3 $1 \
+      redis-cli \
+        -h localhost \
+        -p $REDIS_PORT \
+        ping
+    )
+    if [ "$response" != "PONG" ] && [ "$response" != "LOADING Redis is loading the dataset in memory" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_readiness_master.sh: |-
+    #!/bin/bash
+
+    [[ -f $REDIS_MASTER_PASSWORD_FILE ]] && export REDIS_MASTER_PASSWORD="$(< "${REDIS_MASTER_PASSWORD_FILE}")"
+    [[ -n "$REDIS_MASTER_PASSWORD" ]] && export REDISCLI_AUTH="$REDIS_MASTER_PASSWORD"
+    response=$(
+      timeout -s 3 $1 \
+      redis-cli \
+        -h $REDIS_MASTER_HOST \
+        -p $REDIS_MASTER_PORT_NUMBER \
+        ping
+    )
+    if [ "$response" != "PONG" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_liveness_master.sh: |-
+    #!/bin/bash
+
+    [[ -f $REDIS_MASTER_PASSWORD_FILE ]] && export REDIS_MASTER_PASSWORD="$(< "${REDIS_MASTER_PASSWORD_FILE}")"
+    [[ -n "$REDIS_MASTER_PASSWORD" ]] && export REDISCLI_AUTH="$REDIS_MASTER_PASSWORD"
+    response=$(
+      timeout -s 3 $1 \
+      redis-cli \
+        -h $REDIS_MASTER_HOST \
+        -p $REDIS_MASTER_PORT_NUMBER \
+        ping
+    )
+    if [ "$response" != "PONG" ] && [ "$response" != "LOADING Redis is loading the dataset in memory" ]; then
+      echo "$response"
+      exit 1
+    fi
+  ping_readiness_local_and_master.sh: |-
+    script_dir="$(dirname "$0")"
+    exit_status=0
+    "$script_dir/ping_readiness_local.sh" $1 || exit_status=$?
+    "$script_dir/ping_readiness_master.sh" $1 || exit_status=$?
+    exit $exit_status
+  ping_liveness_local_and_master.sh: |-
+    script_dir="$(dirname "$0")"
+    exit_status=0
+    "$script_dir/ping_liveness_local.sh" $1 || exit_status=$?
+    "$script_dir/ping_liveness_master.sh" $1 || exit_status=$?
+    exit $exit_status
+---
+# Source: sa-final-project/charts/redis/templates/scripts-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-redis-scripts
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-15.7.0
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+data:
+  start-master.sh: |
+    #!/bin/bash
+
+    [[ -f $REDIS_PASSWORD_FILE ]] && export REDIS_PASSWORD="$(< "${REDIS_PASSWORD_FILE}")"
+    if [[ ! -f /opt/bitnami/redis/etc/master.conf ]];then
+        cp /opt/bitnami/redis/mounted-etc/master.conf /opt/bitnami/redis/etc/master.conf
+    fi
+    if [[ ! -f /opt/bitnami/redis/etc/redis.conf ]];then
+        cp /opt/bitnami/redis/mounted-etc/redis.conf /opt/bitnami/redis/etc/redis.conf
+    fi
+    ARGS=("--port" "${REDIS_PORT}")
+    ARGS+=("--protected-mode" "no")
+    ARGS+=("--include" "/opt/bitnami/redis/etc/redis.conf")
+    ARGS+=("--include" "/opt/bitnami/redis/etc/master.conf")
+    exec redis-server "${ARGS[@]}"
+  start-replica.sh: |
+    #!/bin/bash
+
+    get_port() {
+        hostname="$1"
+        type="$2"
+
+        port_var=$(echo "${hostname^^}_SERVICE_PORT_$type" | sed "s/-/_/g")
+        port=${!port_var}
+
+        if [ -z "$port" ]; then
+            case $type in
+                "SENTINEL")
+                    echo 26379
+                    ;;
+                "REDIS")
+                    echo 6379
+                    ;;
+            esac
+        else
+            echo $port
+        fi
+    }
+
+    get_full_hostname() {
+        hostname="$1"
+        echo "${hostname}.${HEADLESS_SERVICE}"
+    }
+
+    REDISPORT=$(get_port "$HOSTNAME" "REDIS")
+
+    [[ -f $REDIS_PASSWORD_FILE ]] && export REDIS_PASSWORD="$(< "${REDIS_PASSWORD_FILE}")"
+    [[ -f $REDIS_MASTER_PASSWORD_FILE ]] && export REDIS_MASTER_PASSWORD="$(< "${REDIS_MASTER_PASSWORD_FILE}")"
+    if [[ ! -f /opt/bitnami/redis/etc/replica.conf ]];then
+        cp /opt/bitnami/redis/mounted-etc/replica.conf /opt/bitnami/redis/etc/replica.conf
+    fi
+    if [[ ! -f /opt/bitnami/redis/etc/redis.conf ]];then
+        cp /opt/bitnami/redis/mounted-etc/redis.conf /opt/bitnami/redis/etc/redis.conf
+    fi
+
+    echo "" >> /opt/bitnami/redis/etc/replica.conf
+    echo "replica-announce-port $REDISPORT" >> /opt/bitnami/redis/etc/replica.conf
+    echo "replica-announce-ip $(get_full_hostname "$HOSTNAME")" >> /opt/bitnami/redis/etc/replica.conf
+    ARGS=("--port" "${REDIS_PORT}")
+    ARGS+=("--slaveof" "${REDIS_MASTER_HOST}" "${REDIS_MASTER_PORT_NUMBER}")
+    ARGS+=("--protected-mode" "no")
+    ARGS+=("--include" "/opt/bitnami/redis/etc/redis.conf")
+    ARGS+=("--include" "/opt/bitnami/redis/etc/replica.conf")
+    exec redis-server "${ARGS[@]}"
+---
 # Source: sa-final-project/templates/kafka-config.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -304,16 +540,27 @@ data:
   APP_PROFILE: prod
   SPRING_PROFILES_ACTIVE: prod
 ---
+# Source: sa-final-project/templates/redis-config
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-redis-config-1
+data:
+  REDIS_HOST: dev-redis-master
+  REDIS_PORT: "6379"
+---
 # Source: sa-final-project/templates/services-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dev-services-config-1
 data:
-  VEHICLE_SERVICE: vehicle-svc-dev
-  AUTH_SERVICE: auth-svc-dev
-  BOOKING_SERVICE:  booking-svc-dev
-  EMAIL_SERVICE: email-svc-dev
+  VEHICLE_SERVICE: vehicle-svc-dev/api/vehicles
+  AUTH_SERVICE: auth-svc-dev/api/auth
+  BOOKING_SERVICE:  booking-svc-dev/api/bookings
+  EMAIL_SERVICE: email-svc-dev/api/notifications
+  PAYMENT_SERVICE: payment-svc-dev/api/payments
+  REVIEW_SERVICE: review-svc-dev/api/reviews
 ---
 # Source: sa-final-project/templates/zipkin-config.yml
 apiVersion: v1
@@ -321,7 +568,7 @@ kind: ConfigMap
 metadata:
   name: dev-zipkin-config-1
 data:
-  ZIPKIN_SERVER_URL: dev-zipkin:9411
+  ZIPKIN_SERVER_URL: http://zipkin-dev:9411
 ---
 # Source: sa-final-project/charts/mongodb/templates/standalone/pvc.yaml
 kind: PersistentVolumeClaim
@@ -401,7 +648,7 @@ spec:
   type: ClusterIP
   ports:
     - port: 80
-      targetPort: http
+      targetPort: 8080
       protocol: TCP
       name: http
   selector:
@@ -604,6 +851,121 @@ spec:
     app.kubernetes.io/instance: dev
     app.kubernetes.io/component: primary
 ---
+# Source: sa-final-project/charts/payment-svc/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-svc-dev
+  labels:
+    helm.sh/chart: payment-svc-0.1.0
+    app.kubernetes.io/name: payment-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: payment-svc
+    app.kubernetes.io/instance: dev
+---
+# Source: sa-final-project/charts/redis/templates/headless-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-redis-headless
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-15.7.0
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: tcp-redis
+      port: 6379
+      targetPort: redis
+  selector:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: dev
+---
+# Source: sa-final-project/charts/redis/templates/master/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-redis-master
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-15.7.0
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: master
+spec:
+  type: ClusterIP
+
+  ports:
+    - name: tcp-redis
+      port: 6379
+      targetPort: redis
+      nodePort: null
+  selector:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/component: master
+---
+# Source: sa-final-project/charts/redis/templates/replicas/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-redis-replicas
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-15.7.0
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: replica
+spec:
+  type: ClusterIP
+  ports:
+    - name: tcp-redis
+      port: 6379
+      targetPort: redis
+      nodePort: null
+  selector:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/component: replica
+---
+# Source: sa-final-project/charts/review-svc/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: review-svc-dev
+  labels:
+    helm.sh/chart: review-svc-0.1.0
+    app.kubernetes.io/name: review-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: review-svc
+    app.kubernetes.io/instance: dev
+---
 # Source: sa-final-project/charts/vehicle-svc/templates/service.yaml
 apiVersion: v1
 kind: Service
@@ -631,7 +993,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-zipkin
+  name: zipkin-dev
   labels:
     helm.sh/chart: zipkin-0.1.0
     app.kubernetes.io/name: zipkin
@@ -744,7 +1106,7 @@ spec:
           securityContext:
             {}
           image: "ghcr.io/devbinod/sa-booking-detail-service:main"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
@@ -812,7 +1174,7 @@ spec:
           securityContext:
             {}
           image: "ghcr.io/devbinod/email-notification:main"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
@@ -834,6 +1196,8 @@ spec:
                 name: dev-profile-config-1
             - configMapRef:
                 name: dev-zipkin-config-1
+            - configMapRef:
+                name: dev-kafka-config-1
           resources:
             {}
 ---
@@ -962,6 +1326,136 @@ spec:
           persistentVolumeClaim:
             claimName: dev-mongodb
 ---
+# Source: sa-final-project/charts/payment-svc/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-svc-dev
+  labels:
+    helm.sh/chart: payment-svc-0.1.0
+    app.kubernetes.io/name: payment-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment-svc
+      app.kubernetes.io/instance: dev
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: payment-svc
+        app.kubernetes.io/instance: dev
+    spec:
+      serviceAccountName: payment-svc-dev
+      securityContext:
+        {}
+      containers:
+        - name: payment-svc
+          securityContext:
+            {}
+          image: "ghcr.io/devbinod/sa-payment-service:main"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path:  /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path:  /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          envFrom:
+            - secretRef:
+                name: dev-mongo-secrets-1
+            - secretRef:
+                name: dev-jwt-secrets-1
+            - configMapRef:
+                name: dev-mongodb-config-1
+            - configMapRef:
+                name: dev-profile-config-1
+            - configMapRef:
+                name: dev-services-config-1
+            - configMapRef:
+                name: dev-zipkin-config-1
+            - configMapRef:
+                name: dev-kafka-config-1
+          resources:
+            {}
+---
+# Source: sa-final-project/charts/review-svc/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review-svc-dev
+  labels:
+    helm.sh/chart: review-svc-0.1.0
+    app.kubernetes.io/name: review-svc
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: review-svc
+      app.kubernetes.io/instance: dev
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: review-svc
+        app.kubernetes.io/instance: dev
+    spec:
+      serviceAccountName: review-svc-dev
+      securityContext:
+        {}
+      containers:
+        - name: review-svc
+          securityContext:
+            {}
+          image: "ghcr.io/jenish628/safinal-reviewservice:main"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path:  /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path:  /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          envFrom:
+            - secretRef:
+                name: dev-mongo-secrets-1
+            - secretRef:
+                name: dev-jwt-secrets-1
+            - configMapRef:
+                name: dev-mongodb-config-1
+            - configMapRef:
+                name: dev-profile-config-1
+            - configMapRef:
+                name: dev-zipkin-config-1
+            - configMapRef:
+                name: dev-redis-config-1
+          resources:
+            {}
+---
 # Source: sa-final-project/charts/vehicle-svc/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -1020,7 +1514,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dev-zipkin
+  name: zipkin-dev
   labels:
     helm.sh/chart: zipkin-0.1.0
     app.kubernetes.io/name: zipkin
@@ -1039,14 +1533,14 @@ spec:
         app.kubernetes.io/name: zipkin
         app.kubernetes.io/instance: dev
     spec:
-      serviceAccountName: dev-zipkin
+      serviceAccountName: zipkin-dev
       securityContext:
         {}
       containers:
         - name: zipkin
           securityContext:
             {}
-          image: "ghcr.io/openzipkin/zipkin:1.16.0"
+          image: "ghcr.io/openzipkin/zipkin:latest"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -1054,11 +1548,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: "/zipkin/health"
+              path: "/health"
               port: 9411
           readinessProbe:
             httpGet:
-              path: "/zipkin/health"
+              path: "/health"
               port: 9411
           resources:
             {}
@@ -1570,6 +2064,313 @@ spec:
           requests:
             storage: "8Gi"
 ---
+# Source: sa-final-project/charts/redis/templates/master/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dev-redis-master
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-15.7.0
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: dev
+      app.kubernetes.io/component: master
+  serviceName: dev-redis-headless
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis
+        helm.sh/chart: redis-15.7.0
+        app.kubernetes.io/instance: dev
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: master
+      annotations:
+        checksum/configmap: 6f59ae1b4f51d9080664cc1f8327574f837cf2288bdb0e9533b3df7410f21765
+        checksum/health: d930215665ae1d549ef1c2b528948d17c9878f72f9ccbc7dc07c9ed8a1ac2e9d
+        checksum/scripts: 0f3f8a0a581752797259eab3d60c412b6ea70d2e8e0f0ec15c3722451871106c
+        checksum/secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    spec:
+
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: dev-redis
+      affinity:
+        podAffinity:
+
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: redis
+                    app.kubernetes.io/instance: dev
+                    app.kubernetes.io/component: master
+                namespaces:
+                  - "default"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: redis
+          image: docker.io/bitnami/redis:6.2.6-debian-10-r81
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsUser: 1001
+          command:
+            - /bin/bash
+          args:
+            - -c
+            - /opt/bitnami/scripts/start-scripts/start-master.sh
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: REDIS_REPLICATION_MODE
+              value: master
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+            - name: REDIS_TLS_ENABLED
+              value: "no"
+            - name: REDIS_PORT
+              value: "6379"
+          ports:
+            - name: redis
+              containerPort: 6379
+          livenessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            # One second longer than command timeout should prevent generation of zombie processes.
+            timeoutSeconds: 6
+            successThreshold: 1
+            failureThreshold: 5
+            exec:
+              command:
+                - sh
+                - -c
+                - /health/ping_liveness_local.sh 5
+          readinessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 5
+            exec:
+              command:
+                - sh
+                - -c
+                - /health/ping_readiness_local.sh 1
+          resources:
+            limits: {}
+            requests: {}
+          volumeMounts:
+            - name: start-scripts
+              mountPath: /opt/bitnami/scripts/start-scripts
+            - name: health
+              mountPath: /health
+            - name: redis-data
+              mountPath: /data
+              subPath:
+            - name: config
+              mountPath: /opt/bitnami/redis/mounted-etc
+            - name: redis-tmp-conf
+              mountPath: /opt/bitnami/redis/etc/
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: start-scripts
+          configMap:
+            name: dev-redis-scripts
+            defaultMode: 0755
+        - name: health
+          configMap:
+            name: dev-redis-health
+            defaultMode: 0755
+        - name: config
+          configMap:
+            name: dev-redis-configuration
+        - name: redis-tmp-conf
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+        labels:
+          app.kubernetes.io/name: redis
+          app.kubernetes.io/instance: dev
+          app.kubernetes.io/component: master
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
+---
+# Source: sa-final-project/charts/redis/templates/replicas/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dev-redis-replicas
+  namespace: "default"
+  labels:
+    app.kubernetes.io/name: redis
+    helm.sh/chart: redis-15.7.0
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: replica
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: dev
+      app.kubernetes.io/component: replica
+  serviceName: dev-redis-headless
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis
+        helm.sh/chart: redis-15.7.0
+        app.kubernetes.io/instance: dev
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: replica
+      annotations:
+        checksum/configmap: 6f59ae1b4f51d9080664cc1f8327574f837cf2288bdb0e9533b3df7410f21765
+        checksum/health: d930215665ae1d549ef1c2b528948d17c9878f72f9ccbc7dc07c9ed8a1ac2e9d
+        checksum/scripts: 0f3f8a0a581752797259eab3d60c412b6ea70d2e8e0f0ec15c3722451871106c
+        checksum/secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    spec:
+
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: dev-redis
+      affinity:
+        podAffinity:
+
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: redis
+                    app.kubernetes.io/instance: dev
+                    app.kubernetes.io/component: replica
+                namespaces:
+                  - "default"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: redis
+          image: docker.io/bitnami/redis:6.2.6-debian-10-r81
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsUser: 1001
+          command:
+            - /bin/bash
+          args:
+            - -c
+            - /opt/bitnami/scripts/start-scripts/start-replica.sh
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: REDIS_REPLICATION_MODE
+              value: slave
+            - name: REDIS_MASTER_HOST
+              value: dev-redis-master-0.dev-redis-headless.default.svc.cluster.local
+            - name: REDIS_MASTER_PORT_NUMBER
+              value: "6379"
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+            - name: REDIS_TLS_ENABLED
+              value: "no"
+            - name: REDIS_PORT
+              value: "6379"
+          ports:
+            - name: redis
+              containerPort: 6379
+          livenessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 6
+            successThreshold: 1
+            failureThreshold: 5
+            exec:
+              command:
+                - sh
+                - -c
+                - /health/ping_liveness_local_and_master.sh 5
+          readinessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 5
+            exec:
+              command:
+                - sh
+                - -c
+                - /health/ping_readiness_local_and_master.sh 1
+          resources:
+            limits: {}
+            requests: {}
+          volumeMounts:
+            - name: start-scripts
+              mountPath: /opt/bitnami/scripts/start-scripts
+            - name: health
+              mountPath: /health
+            - name: redis-data
+              mountPath: /data
+              subPath:
+            - name: config
+              mountPath: /opt/bitnami/redis/mounted-etc
+            - name: redis-tmp-conf
+              mountPath: /opt/bitnami/redis/etc
+      volumes:
+        - name: start-scripts
+          configMap:
+            name: dev-redis-scripts
+            defaultMode: 0755
+        - name: health
+          configMap:
+            name: dev-redis-health
+            defaultMode: 0755
+        - name: config
+          configMap:
+            name: dev-redis-configuration
+        - name: redis-tmp-conf
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+        labels:
+          app.kubernetes.io/name: redis
+          app.kubernetes.io/instance: dev
+          app.kubernetes.io/component: replica
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
+---
 # Source: sa-final-project/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -1616,7 +2417,7 @@ spec:
 
           - backend:
               service:
-                name: dev-zipkin
+                name: zipkin-dev
                 port:
                   number: 9411
             path: /zipkin
@@ -1626,6 +2427,21 @@ spec:
               service:
                 name: email-svc-dev
                 port:
-                  number: 8080
+                  number: 80
             path: /api/notifications
+            pathType: Prefix
+
+          - backend:
+              service:
+                name: review-svc-dev
+                port:
+                  number: 80
+            path: /api/reviews
+            pathType: Prefix
+          - backend:
+              service:
+                name: payment-svc-dev
+                port:
+                  number: 80
+            path: /api/payments
             pathType: Prefix
