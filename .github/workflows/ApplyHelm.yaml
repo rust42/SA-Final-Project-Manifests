@@ -68,8 +68,9 @@ jobs:
 
       # Deploy the Docker image to the GKE cluster
       - name: Deploy
+        working-directory: ./Projects
         run: |-
-             helm upgrade dev ./Projects --install -f values.yaml)
+             helm upgrade dev . --install -f values.yaml
 #      - name: Deploy
 #        run: |-
 #          kubectl apply -f https://raw.githubusercontent.com/rust42/SA-FinalProject-UserService/main/k8s/template.yaml
