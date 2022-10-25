@@ -28,4 +28,4 @@ jobs:
       - name: Deploy
         working-directory: ./Projects
         run: |-
-          helm upgrade dev . --install -f values.yaml
+          helm upgrade prod . --install -f values.yaml
