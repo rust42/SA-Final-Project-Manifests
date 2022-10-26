@@ -94,6 +94,7 @@ configMaps:
   - auth-mysql-config
   - profile-config
   - zipkin-config
+  - kafka-config
 
 mysql:
   database: AuthDB

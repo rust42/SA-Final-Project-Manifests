@@ -3,11 +3,11 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: booking-svc-dev
+  name: booking-svc-release-name
   labels:
     helm.sh/chart: booking-svc-0.1.0
     app.kubernetes.io/name: booking-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 ---
@@ -15,11 +15,11 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: email-svc-dev
+  name: email-svc-release-name
   labels:
     helm.sh/chart: email-svc-0.1.0
     app.kubernetes.io/name: email-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 ---
@@ -27,11 +27,11 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: dev-kafka
+  name: release-name-kafka
   labels:
     app.kubernetes.io/name: kafka
     helm.sh/chart: kafka-14.9.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: kafka
 automountServiceAccountToken: true
@@ -40,42 +40,42 @@ automountServiceAccountToken: true
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: dev-mongodb
+  name: release-name-mongodb
   namespace: "default"
   labels:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-13.1.7
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
 secrets:
-  - name: dev-mongodb
+  - name: release-name-mongodb
 automountServiceAccountToken: true
 ---
 # Source: sa-final-project/charts/mysql/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: dev-mysql
+  name: release-name-mysql
   namespace: "default"
   labels:
     app.kubernetes.io/name: mysql
     helm.sh/chart: mysql-9.4.1
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
   annotations:
 automountServiceAccountToken: true
 secrets:
-  - name: dev-mysql
+  - name: release-name-mysql
 ---
 # Source: sa-final-project/charts/payment-svc/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: payment-svc-dev
+  name: payment-svc-release-name
   labels:
     helm.sh/chart: payment-svc-0.1.0
     app.kubernetes.io/name: payment-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 ---
@@ -84,23 +84,23 @@ apiVersion: v1
 kind: ServiceAccount
 automountServiceAccountToken: true
 metadata:
-  name: dev-redis
+  name: release-name-redis
   namespace: "default"
   labels:
     app.kubernetes.io/name: redis
     helm.sh/chart: redis-15.7.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: sa-final-project/charts/review-svc/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: review-svc-dev
+  name: review-svc-release-name
   labels:
     helm.sh/chart: review-svc-0.1.0
     app.kubernetes.io/name: review-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 ---
@@ -108,12 +108,12 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: vehicle-svc-dev
+  name: vehicle-svc-release-name
 
   labels:
     helm.sh/chart: vehicle-svc-0.1.0
     app.kubernetes.io/name: vehicle-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 ---
@@ -121,11 +121,11 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: zipkin-dev
+  name: zipkin-release-name
   labels:
     helm.sh/chart: zipkin-0.1.0
     app.kubernetes.io/name: zipkin
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 ---
@@ -133,12 +133,12 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: dev-mongodb
+  name: release-name-mongodb
   namespace: default
   labels:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-13.1.7
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: mongodb
 type: Opaque
@@ -149,23 +149,23 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: dev-mysql
+  name: release-name-mysql
   namespace: "default"
   labels:
     app.kubernetes.io/name: mysql
     helm.sh/chart: mysql-9.4.1
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
 type: Opaque
 data:
   mysql-root-password: "dTMyaXV3ZXVpdXdla2o="
-  mysql-password: "NEFpeFA5ZXdSSg=="
+  mysql-password: "aFBTMlR0bjNwTg=="
 ---
 # Source: sa-final-project/templates/jwt-secrets.yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: dev-jwt-secrets-1
+  name: release-name-jwt-secrets-1
 data:
   JWT_PREFIX: NjI1NkIzRTVDRkMyQzk5Mw==
   JWT_SECRET: QEBUbDhRbkZZUzJXJkBLSmtCOWkzQyp0aHdIWCFtUFcxSjBORzJrWjVsNlNmNmo3JiE=
@@ -175,7 +175,7 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: dev-mongo-secrets-1
+  name: release-name-mongo-secrets-1
 data:
   MONGODB_USERNAME: cm9vdA==
   MONGODB_PASSWORD: R25oc2lwb1dIYTFCMjlENWpGV15UVGNVOGdZdFBnN15HU3Btbw==
@@ -184,7 +184,7 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: dev-mysql-secrets-1
+  name: release-name-mysql-secrets-1
 data:
   MYSQL_PASSWORD: dTMyaXV3ZXVpdXdla2o=
   MYSQL_USER: cm9vdA==
@@ -193,7 +193,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-auth-mysql-config-1
+  name: release-name-auth-mysql-config-1
 data:
   MYSQL_DB_NAME: AuthDB
 ---
@@ -201,7 +201,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-booking-svc-config-1
+  name: release-name-booking-svc-config-1
 data:
   MYSQL_DB_NAME: BookingDB
 ---
@@ -209,17 +209,17 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-kafka-scripts
+  name: release-name-kafka-scripts
   labels:
     app.kubernetes.io/name: kafka
     helm.sh/chart: kafka-14.9.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
 data:
   setup.sh: |-
     #!/bin/bash
 
-    ID="${MY_POD_NAME#"dev-kafka-"}"
+    ID="${MY_POD_NAME#"release-name-kafka-"}"
     if [[ -f "/bitnami/kafka/data/meta.properties" ]]; then
         export KAFKA_CFG_BROKER_ID="$(grep "broker.id" /bitnami/kafka/data/meta.properties | awk -F '=' '{print $2}')"
     else
@@ -232,12 +232,12 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-mongodb-common-scripts
+  name: release-name-mongodb-common-scripts
   namespace: "default"
   labels:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-13.1.7
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: mongodb
 data:
@@ -265,12 +265,12 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-mysql
+  name: release-name-mysql
   namespace: "default"
   labels:
     app.kubernetes.io/name: mysql
     helm.sh/chart: mysql-9.4.1
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: primary
 data:
@@ -310,12 +310,12 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-redis-configuration
+  name: release-name-redis-configuration
   namespace: "default"
   labels:
     app.kubernetes.io/name: redis
     helm.sh/chart: redis-15.7.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
 data:
   redis.conf: |-
@@ -343,12 +343,12 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-redis-health
+  name: release-name-redis-health
   namespace: "default"
   labels:
     app.kubernetes.io/name: redis
     helm.sh/chart: redis-15.7.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
 data:
   ping_readiness_local.sh: |-
@@ -432,12 +432,12 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-redis-scripts
+  name: release-name-redis-scripts
   namespace: "default"
   labels:
     app.kubernetes.io/name: redis
     helm.sh/chart: redis-15.7.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
 data:
   start-master.sh: |
@@ -509,33 +509,33 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-kafka-config-1
+  name: release-name-kafka-config-1
 data:
-  KAFKA_SERVER_URL: dev-kafka:9092
+  KAFKA_SERVER_URL: release-name-kafka:9092
 ---
 # Source: sa-final-project/templates/mongodb-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-mongodb-config-1
+  name: release-name-mongodb-config-1
 data:
-  MONGODB_HOST: dev-mongodb
+  MONGODB_HOST: release-name-mongodb
   MONGODB_PORT: "27017"
 ---
 # Source: sa-final-project/templates/mysql-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-mysql-config-1
+  name: release-name-mysql-config-1
 data:
-  MYSQL_DB_HOST: dev-mysql:3306
+  MYSQL_DB_HOST: release-name-mysql:3306
   APP_PROFILE: prod
 ---
 # Source: sa-final-project/templates/profile-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-profile-config-1
+  name: release-name-profile-config-1
 data:
   APP_PROFILE: prod
   SPRING_PROFILES_ACTIVE: prod
@@ -544,42 +544,42 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-redis-config-1
+  name: release-name-redis-config-1
 data:
-  REDIS_HOST: dev-redis-master
+  REDIS_HOST: release-name-redis-master
   REDIS_PORT: "6379"
 ---
 # Source: sa-final-project/templates/services-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-services-config-1
+  name: release-name-services-config-1
 data:
-  VEHICLE_SERVICE: vehicle-svc-dev/api/vehicles
-  AUTH_SERVICE: auth-svc-dev/api/auth
-  BOOKING_SERVICE:  booking-svc-dev/api/bookings
-  EMAIL_SERVICE: email-svc-dev/api/notifications
-  PAYMENT_SERVICE: payment-svc-dev/api/payments
-  REVIEW_SERVICE: review-svc-dev/api/reviews
+  VEHICLE_SERVICE: vehicle-svc-release-name/api/vehicles
+  AUTH_SERVICE: auth-svc-release-name/api/auth
+  BOOKING_SERVICE:  booking-svc-release-name/api/bookings
+  EMAIL_SERVICE: email-svc-release-name/api/notifications
+  PAYMENT_SERVICE: payment-svc-release-name/api/payments
+  REVIEW_SERVICE: review-svc-release-name/api/reviews
 ---
 # Source: sa-final-project/templates/zipkin-config.yml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dev-zipkin-config-1
+  name: release-name-zipkin-config-1
 data:
-  ZIPKIN_SERVER_URL: http://zipkin-dev:9411
+  ZIPKIN_SERVER_URL: http://zipkin-release-name:9411
 ---
 # Source: sa-final-project/charts/mongodb/templates/standalone/pvc.yaml
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: dev-mongodb
+  name: release-name-mongodb
   namespace: "default"
   labels:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-13.1.7
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: mongodb
 spec:
@@ -593,11 +593,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-svc-dev
+  name: auth-svc-release-name
   labels:
     helm.sh/chart: auth-svc-0.1.0
     app.kubernetes.io/name: auth-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -609,17 +609,17 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: auth-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
 ---
 # Source: sa-final-project/charts/booking-svc/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: booking-svc-dev
+  name: booking-svc-release-name
   labels:
     helm.sh/chart: booking-svc-0.1.0
     app.kubernetes.io/name: booking-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -631,17 +631,17 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: booking-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
 ---
 # Source: sa-final-project/charts/email-svc/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: email-svc-dev
+  name: email-svc-release-name
   labels:
     helm.sh/chart: email-svc-0.1.0
     app.kubernetes.io/name: email-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -653,18 +653,18 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: email-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
 ---
 # Source: sa-final-project/charts/kafka/charts/zookeeper/templates/svc-headless.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-zookeeper-headless
+  name: release-name-zookeeper-headless
   namespace: default
   labels:
     app.kubernetes.io/name: zookeeper
     helm.sh/chart: zookeeper-7.5.1
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: zookeeper
 spec:
@@ -686,19 +686,19 @@ spec:
       targetPort: election
   selector:
     app.kubernetes.io/name: zookeeper
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/component: zookeeper
 ---
 # Source: sa-final-project/charts/kafka/charts/zookeeper/templates/svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-zookeeper
+  name: release-name-zookeeper
   namespace: default
   labels:
     app.kubernetes.io/name: zookeeper
     helm.sh/chart: zookeeper-7.5.1
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: zookeeper
 spec:
@@ -719,18 +719,18 @@ spec:
       targetPort: election
   selector:
     app.kubernetes.io/name: zookeeper
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/component: zookeeper
 ---
 # Source: sa-final-project/charts/kafka/templates/svc-headless.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-kafka-headless
+  name: release-name-kafka-headless
   labels:
     app.kubernetes.io/name: kafka
     helm.sh/chart: kafka-14.9.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: kafka
 spec:
@@ -747,18 +747,18 @@ spec:
       targetPort: kafka-internal
   selector:
     app.kubernetes.io/name: kafka
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/component: kafka
 ---
 # Source: sa-final-project/charts/kafka/templates/svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-kafka
+  name: release-name-kafka
   labels:
     app.kubernetes.io/name: kafka
     helm.sh/chart: kafka-14.9.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: kafka
 spec:
@@ -771,19 +771,19 @@ spec:
       nodePort: null
   selector:
     app.kubernetes.io/name: kafka
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/component: kafka
 ---
 # Source: sa-final-project/charts/mongodb/templates/standalone/svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-mongodb
+  name: release-name-mongodb
   namespace: "default"
   labels:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-13.1.7
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: mongodb
 spec:
@@ -796,19 +796,19 @@ spec:
       nodePort: null
   selector:
     app.kubernetes.io/name: mongodb
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/component: mongodb
 ---
 # Source: sa-final-project/charts/mysql/templates/primary/svc-headless.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-mysql-headless
+  name: release-name-mysql-headless
   namespace: "default"
   labels:
     app.kubernetes.io/name: mysql
     helm.sh/chart: mysql-9.4.1
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: primary
 spec:
@@ -821,19 +821,19 @@ spec:
       targetPort: mysql
   selector:
     app.kubernetes.io/name: mysql
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/component: primary
 ---
 # Source: sa-final-project/charts/mysql/templates/primary/svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-mysql
+  name: release-name-mysql
   namespace: "default"
   labels:
     app.kubernetes.io/name: mysql
     helm.sh/chart: mysql-9.4.1
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: primary
   annotations:
@@ -848,18 +848,18 @@ spec:
       nodePort: null
   selector:
     app.kubernetes.io/name: mysql
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/component: primary
 ---
 # Source: sa-final-project/charts/payment-svc/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: payment-svc-dev
+  name: payment-svc-release-name
   labels:
     helm.sh/chart: payment-svc-0.1.0
     app.kubernetes.io/name: payment-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -871,18 +871,18 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: payment-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
 ---
 # Source: sa-final-project/charts/redis/templates/headless-svc.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-redis-headless
+  name: release-name-redis-headless
   namespace: "default"
   labels:
     app.kubernetes.io/name: redis
     helm.sh/chart: redis-15.7.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -893,18 +893,18 @@ spec:
       targetPort: redis
   selector:
     app.kubernetes.io/name: redis
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
 ---
 # Source: sa-final-project/charts/redis/templates/master/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-redis-master
+  name: release-name-redis-master
   namespace: "default"
   labels:
     app.kubernetes.io/name: redis
     helm.sh/chart: redis-15.7.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: master
 spec:
@@ -917,19 +917,19 @@ spec:
       nodePort: null
   selector:
     app.kubernetes.io/name: redis
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/component: master
 ---
 # Source: sa-final-project/charts/redis/templates/replicas/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: dev-redis-replicas
+  name: release-name-redis-replicas
   namespace: "default"
   labels:
     app.kubernetes.io/name: redis
     helm.sh/chart: redis-15.7.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: replica
 spec:
@@ -941,18 +941,18 @@ spec:
       nodePort: null
   selector:
     app.kubernetes.io/name: redis
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/component: replica
 ---
 # Source: sa-final-project/charts/review-svc/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: review-svc-dev
+  name: review-svc-release-name
   labels:
     helm.sh/chart: review-svc-0.1.0
     app.kubernetes.io/name: review-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -964,18 +964,18 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: review-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
 ---
 # Source: sa-final-project/charts/vehicle-svc/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: vehicle-svc-dev
+  name: vehicle-svc-release-name
 
   labels:
     helm.sh/chart: vehicle-svc-0.1.0
     app.kubernetes.io/name: vehicle-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -987,17 +987,17 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: vehicle-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
 ---
 # Source: sa-final-project/charts/zipkin/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: zipkin-dev
+  name: zipkin-release-name
   labels:
     helm.sh/chart: zipkin-0.1.0
     app.kubernetes.io/name: zipkin
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1009,17 +1009,17 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: zipkin
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
 ---
 # Source: sa-final-project/charts/auth-svc/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-svc-dev
+  name: auth-svc-release-name
   labels:
     helm.sh/chart: auth-svc-0.1.0
     app.kubernetes.io/name: auth-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1027,12 +1027,12 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: auth-svc
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
   template:
     metadata:
       labels:
         app.kubernetes.io/name: auth-svc
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
     spec:
       serviceAccountName: default
       securityContext:
@@ -1061,17 +1061,17 @@ spec:
             periodSeconds: 60
           envFrom:
             - secretRef:
-                name: dev-jwt-secrets-1
+                name: release-name-jwt-secrets-1
             - secretRef:
-                name: dev-mysql-secrets-1
+                name: release-name-mysql-secrets-1
             - configMapRef:
-                name: dev-mysql-config-1
+                name: release-name-mysql-config-1
             - configMapRef:
-                name: dev-auth-mysql-config-1
+                name: release-name-auth-mysql-config-1
             - configMapRef:
-                name: dev-profile-config-1
+                name: release-name-profile-config-1
             - configMapRef:
-                name: dev-zipkin-config-1
+                name: release-name-zipkin-config-1
           resources:
             {}
 ---
@@ -1079,11 +1079,11 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: booking-svc-dev
+  name: booking-svc-release-name
   labels:
     helm.sh/chart: booking-svc-0.1.0
     app.kubernetes.io/name: booking-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1091,14 +1091,14 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: booking-svc
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
   template:
     metadata:
       labels:
         app.kubernetes.io/name: booking-svc
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
     spec:
-      serviceAccountName: booking-svc-dev
+      serviceAccountName: booking-svc-release-name
       securityContext:
         {}
       containers:
@@ -1125,21 +1125,21 @@ spec:
             periodSeconds: 60
           envFrom:
             - secretRef:
-                name: dev-jwt-secrets-1
+                name: release-name-jwt-secrets-1
             - secretRef:
-                name: dev-mysql-secrets-1
+                name: release-name-mysql-secrets-1
             - configMapRef:
-                name: dev-mysql-config-1
+                name: release-name-mysql-config-1
             - configMapRef:
-                name: dev-booking-svc-config-1
+                name: release-name-booking-svc-config-1
             - configMapRef:
-                name: dev-profile-config-1
+                name: release-name-profile-config-1
             - configMapRef:
-                name: dev-services-config-1
+                name: release-name-services-config-1
             - configMapRef:
-                name: dev-kafka-config-1
+                name: release-name-kafka-config-1
             - configMapRef:
-                name: dev-zipkin-config-1
+                name: release-name-zipkin-config-1
           resources:
             {}
 ---
@@ -1147,11 +1147,11 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: email-svc-dev
+  name: email-svc-release-name
   labels:
     helm.sh/chart: email-svc-0.1.0
     app.kubernetes.io/name: email-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1159,14 +1159,14 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: email-svc
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
   template:
     metadata:
       labels:
         app.kubernetes.io/name: email-svc
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
     spec:
-      serviceAccountName: email-svc-dev
+      serviceAccountName: email-svc-release-name
       securityContext:
         {}
       containers:
@@ -1193,11 +1193,11 @@ spec:
             periodSeconds: 60
           envFrom:
             - configMapRef:
-                name: dev-profile-config-1
+                name: release-name-profile-config-1
             - configMapRef:
-                name: dev-zipkin-config-1
+                name: release-name-zipkin-config-1
             - configMapRef:
-                name: dev-kafka-config-1
+                name: release-name-kafka-config-1
           resources:
             {}
 ---
@@ -1205,12 +1205,12 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dev-mongodb
+  name: release-name-mongodb
   namespace: "default"
   labels:
     app.kubernetes.io/name: mongodb
     helm.sh/chart: mongodb-13.1.7
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: mongodb
 spec:
@@ -1220,19 +1220,19 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: mongodb
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
       app.kubernetes.io/component: mongodb
   template:
     metadata:
       labels:
         app.kubernetes.io/name: mongodb
         helm.sh/chart: mongodb-13.1.7
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: mongodb
     spec:
 
-      serviceAccountName: dev-mongodb
+      serviceAccountName: release-name-mongodb
       affinity:
         podAffinity:
 
@@ -1242,7 +1242,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: mongodb
-                    app.kubernetes.io/instance: dev
+                    app.kubernetes.io/instance: release-name
                     app.kubernetes.io/component: mongodb
                 namespaces:
                   - "default"
@@ -1269,7 +1269,7 @@ spec:
             - name: MONGODB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: dev-mongodb
+                  name: release-name-mongodb
                   key: mongodb-root-password
             - name: ALLOW_EMPTY_PASSWORD
               value: "no"
@@ -1320,21 +1320,21 @@ spec:
       volumes:
         - name: common-scripts
           configMap:
-            name: dev-mongodb-common-scripts
+            name: release-name-mongodb-common-scripts
             defaultMode: 0550
         - name: datadir
           persistentVolumeClaim:
-            claimName: dev-mongodb
+            claimName: release-name-mongodb
 ---
 # Source: sa-final-project/charts/payment-svc/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment-svc-dev
+  name: payment-svc-release-name
   labels:
     helm.sh/chart: payment-svc-0.1.0
     app.kubernetes.io/name: payment-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1342,14 +1342,14 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: payment-svc
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
   template:
     metadata:
       labels:
         app.kubernetes.io/name: payment-svc
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
     spec:
-      serviceAccountName: payment-svc-dev
+      serviceAccountName: payment-svc-release-name
       securityContext:
         {}
       containers:
@@ -1376,19 +1376,19 @@ spec:
             periodSeconds: 60
           envFrom:
             - secretRef:
-                name: dev-mongo-secrets-1
+                name: release-name-mongo-secrets-1
             - secretRef:
-                name: dev-jwt-secrets-1
+                name: release-name-jwt-secrets-1
             - configMapRef:
-                name: dev-mongodb-config-1
+                name: release-name-mongodb-config-1
             - configMapRef:
-                name: dev-profile-config-1
+                name: release-name-profile-config-1
             - configMapRef:
-                name: dev-services-config-1
+                name: release-name-services-config-1
             - configMapRef:
-                name: dev-zipkin-config-1
+                name: release-name-zipkin-config-1
             - configMapRef:
-                name: dev-kafka-config-1
+                name: release-name-kafka-config-1
           resources:
             {}
 ---
@@ -1396,11 +1396,11 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: review-svc-dev
+  name: review-svc-release-name
   labels:
     helm.sh/chart: review-svc-0.1.0
     app.kubernetes.io/name: review-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1408,14 +1408,14 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: review-svc
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
   template:
     metadata:
       labels:
         app.kubernetes.io/name: review-svc
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
     spec:
-      serviceAccountName: review-svc-dev
+      serviceAccountName: review-svc-release-name
       securityContext:
         {}
       containers:
@@ -1442,17 +1442,17 @@ spec:
             periodSeconds: 60
           envFrom:
             - secretRef:
-                name: dev-mongo-secrets-1
+                name: release-name-mongo-secrets-1
             - secretRef:
-                name: dev-jwt-secrets-1
+                name: release-name-jwt-secrets-1
             - configMapRef:
-                name: dev-mongodb-config-1
+                name: release-name-mongodb-config-1
             - configMapRef:
-                name: dev-profile-config-1
+                name: release-name-profile-config-1
             - configMapRef:
-                name: dev-zipkin-config-1
+                name: release-name-zipkin-config-1
             - configMapRef:
-                name: dev-redis-config-1
+                name: release-name-redis-config-1
           resources:
             {}
 ---
@@ -1460,12 +1460,12 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vehicle-svc-dev
+  name: vehicle-svc-release-name
 
   labels:
     helm.sh/chart: vehicle-svc-0.1.0
     app.kubernetes.io/name: vehicle-svc
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1473,14 +1473,14 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: vehicle-svc
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
   template:
     metadata:
       labels:
         app.kubernetes.io/name: vehicle-svc
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
     spec:
-      serviceAccountName: vehicle-svc-dev
+      serviceAccountName: vehicle-svc-release-name
 
       securityContext:
         {}
@@ -1496,17 +1496,17 @@ spec:
               protocol: TCP
           envFrom:
             - secretRef:
-                name: dev-mongo-secrets-1
+                name: release-name-mongo-secrets-1
             - secretRef:
-                name: dev-jwt-secrets-1
+                name: release-name-jwt-secrets-1
             - configMapRef:
-                name: dev-mongodb-config-1
+                name: release-name-mongodb-config-1
             - configMapRef:
-                name: dev-profile-config-1
+                name: release-name-profile-config-1
             - configMapRef:
-                name: dev-services-config-1
+                name: release-name-services-config-1
             - configMapRef:
-                name: dev-zipkin-config-1
+                name: release-name-zipkin-config-1
           resources:
             {}
 ---
@@ -1514,11 +1514,11 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: zipkin-dev
+  name: zipkin-release-name
   labels:
     helm.sh/chart: zipkin-0.1.0
     app.kubernetes.io/name: zipkin
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1526,14 +1526,14 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: zipkin
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
   template:
     metadata:
       labels:
         app.kubernetes.io/name: zipkin
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
     spec:
-      serviceAccountName: zipkin-dev
+      serviceAccountName: zipkin-release-name
       securityContext:
         {}
       containers:
@@ -1561,17 +1561,17 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dev-zookeeper
+  name: release-name-zookeeper
   namespace: default
   labels:
     app.kubernetes.io/name: zookeeper
     helm.sh/chart: zookeeper-7.5.1
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: zookeeper
     role: zookeeper
 spec:
-  serviceName: dev-zookeeper-headless
+  serviceName: release-name-zookeeper-headless
   replicas: 1
   podManagementPolicy: Parallel
   updateStrategy:
@@ -1579,15 +1579,15 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: zookeeper
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
       app.kubernetes.io/component: zookeeper
   template:
     metadata:
-      name: dev-zookeeper
+      name: release-name-zookeeper
       labels:
         app.kubernetes.io/name: zookeeper
         helm.sh/chart: zookeeper-7.5.1
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: zookeeper
     spec:
@@ -1604,7 +1604,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: zookeeper
-                    app.kubernetes.io/instance: dev
+                    app.kubernetes.io/instance: release-name
                     app.kubernetes.io/component: zookeeper
                 namespaces:
                   - "default"
@@ -1673,7 +1673,7 @@ spec:
             - name: ZOO_MAX_SESSION_TIMEOUT
               value: "40000"
             - name: ZOO_SERVERS
-              value: dev-zookeeper-0.dev-zookeeper-headless.default.svc.cluster.local:2888:3888::1
+              value: release-name-zookeeper-0.release-name-zookeeper-headless.default.svc.cluster.local:2888:3888::1
             - name: ZOO_ENABLE_AUTH
               value: "no"
             - name: ZOO_HEAP_SIZE
@@ -1729,11 +1729,11 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dev-kafka
+  name: release-name-kafka
   labels:
     app.kubernetes.io/name: kafka
     helm.sh/chart: kafka-14.9.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: kafka
 spec:
@@ -1742,9 +1742,9 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: kafka
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
       app.kubernetes.io/component: kafka
-  serviceName: dev-kafka-headless
+  serviceName: release-name-kafka-headless
   updateStrategy:
     type: "RollingUpdate"
   template:
@@ -1752,7 +1752,7 @@ spec:
       labels:
         app.kubernetes.io/name: kafka
         helm.sh/chart: kafka-14.9.0
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: kafka
     spec:
@@ -1766,7 +1766,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: kafka
-                    app.kubernetes.io/instance: dev
+                    app.kubernetes.io/instance: release-name
                     app.kubernetes.io/component: kafka
                 namespaces:
                   - "default"
@@ -1777,7 +1777,7 @@ spec:
       securityContext:
         fsGroup: 1001
         runAsUser: 1001
-      serviceAccountName: dev-kafka
+      serviceAccountName: release-name-kafka
       containers:
         - name: kafka
           image: docker.io/bitnami/kafka:2.8.1-debian-10-r73
@@ -1796,7 +1796,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: KAFKA_CFG_ZOOKEEPER_CONNECT
-              value: "dev-zookeeper"
+              value: "release-name-zookeeper"
             - name: KAFKA_INTER_BROKER_LISTENER_NAME
               value: "INTERNAL"
             - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
@@ -1804,7 +1804,7 @@ spec:
             - name: KAFKA_CFG_LISTENERS
               value: "INTERNAL://:9093,CLIENT://:9092"
             - name: KAFKA_CFG_ADVERTISED_LISTENERS
-              value: "INTERNAL://$(MY_POD_NAME).dev-kafka-headless.default.svc.cluster.local:9093,CLIENT://$(MY_POD_NAME).dev-kafka-headless.default.svc.cluster.local:9092"
+              value: "INTERNAL://$(MY_POD_NAME).release-name-kafka-headless.default.svc.cluster.local:9093,CLIENT://$(MY_POD_NAME).release-name-kafka-headless.default.svc.cluster.local:9092"
             - name: ALLOW_PLAINTEXT_LISTENER
               value: "yes"
             - name: KAFKA_VOLUME_DIR
@@ -1898,7 +1898,7 @@ spec:
       volumes:
         - name: scripts
           configMap:
-            name: dev-kafka-scripts
+            name: release-name-kafka-scripts
             defaultMode: 0755
         - name: logs
           emptyDir: {}
@@ -1916,12 +1916,12 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dev-mysql
+  name: release-name-mysql
   namespace: "default"
   labels:
     app.kubernetes.io/name: mysql
     helm.sh/chart: mysql-9.4.1
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: primary
 spec:
@@ -1930,23 +1930,23 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: mysql
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
       app.kubernetes.io/component: primary
-  serviceName: dev-mysql
+  serviceName: release-name-mysql
   updateStrategy:
     type: RollingUpdate
   template:
     metadata:
       annotations:
-        checksum/configuration: 845b4c472d2503903cad9bb0d0cfd6d5d271595165bdb8b34e80f8ca236f6f1f
+        checksum/configuration: 5326e0ef374ef14c36d3175f9955195aeaeac259f1222ddbc60cbc240f66547d
       labels:
         app.kubernetes.io/name: mysql
         helm.sh/chart: mysql-9.4.1
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: primary
     spec:
-      serviceAccountName: dev-mysql
+      serviceAccountName: release-name-mysql
 
       affinity:
         podAffinity:
@@ -1957,7 +1957,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: mysql
-                    app.kubernetes.io/instance: dev
+                    app.kubernetes.io/instance: release-name
                 namespaces:
                   - "default"
                 topologyKey: kubernetes.io/hostname
@@ -1980,7 +1980,7 @@ spec:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: dev-mysql
+                  name: release-name-mysql
                   key: mysql-root-password
             - name: MYSQL_DATABASE
               value: "my_database"
@@ -2048,13 +2048,13 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: dev-mysql
+            name: release-name-mysql
   volumeClaimTemplates:
     - metadata:
         name: data
         labels:
           app.kubernetes.io/name: mysql
-          app.kubernetes.io/instance: dev
+          app.kubernetes.io/instance: release-name
           app.kubernetes.io/component: primary
         annotations:
       spec:
@@ -2068,12 +2068,12 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dev-redis-master
+  name: release-name-redis-master
   namespace: "default"
   labels:
     app.kubernetes.io/name: redis
     helm.sh/chart: redis-15.7.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: master
 spec:
@@ -2081,9 +2081,9 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: redis
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
       app.kubernetes.io/component: master
-  serviceName: dev-redis-headless
+  serviceName: release-name-redis-headless
   updateStrategy:
     rollingUpdate: {}
     type: RollingUpdate
@@ -2092,19 +2092,19 @@ spec:
       labels:
         app.kubernetes.io/name: redis
         helm.sh/chart: redis-15.7.0
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: master
       annotations:
-        checksum/configmap: 6f59ae1b4f51d9080664cc1f8327574f837cf2288bdb0e9533b3df7410f21765
-        checksum/health: d930215665ae1d549ef1c2b528948d17c9878f72f9ccbc7dc07c9ed8a1ac2e9d
-        checksum/scripts: 0f3f8a0a581752797259eab3d60c412b6ea70d2e8e0f0ec15c3722451871106c
+        checksum/configmap: c3ee690259a8897caee1994fb60c2db60107121b2dcea68c5478e6b37f5c6856
+        checksum/health: 50819fd188d6a9bbc7a312a5ec19c0141dedcfac202796b79881d81202de41c3
+        checksum/scripts: f4487330e725547d0e8e1d87fb5952cd37d73f372dedab0d0e68ad8a30112586
         checksum/secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     spec:
 
       securityContext:
         fsGroup: 1001
-      serviceAccountName: dev-redis
+      serviceAccountName: release-name-redis
       affinity:
         podAffinity:
 
@@ -2114,7 +2114,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: redis
-                    app.kubernetes.io/instance: dev
+                    app.kubernetes.io/instance: release-name
                     app.kubernetes.io/component: master
                 namespaces:
                   - "default"
@@ -2191,15 +2191,15 @@ spec:
       volumes:
         - name: start-scripts
           configMap:
-            name: dev-redis-scripts
+            name: release-name-redis-scripts
             defaultMode: 0755
         - name: health
           configMap:
-            name: dev-redis-health
+            name: release-name-redis-health
             defaultMode: 0755
         - name: config
           configMap:
-            name: dev-redis-configuration
+            name: release-name-redis-configuration
         - name: redis-tmp-conf
           emptyDir: {}
         - name: tmp
@@ -2209,7 +2209,7 @@ spec:
         name: redis-data
         labels:
           app.kubernetes.io/name: redis
-          app.kubernetes.io/instance: dev
+          app.kubernetes.io/instance: release-name
           app.kubernetes.io/component: master
       spec:
         accessModes:
@@ -2222,12 +2222,12 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dev-redis-replicas
+  name: release-name-redis-replicas
   namespace: "default"
   labels:
     app.kubernetes.io/name: redis
     helm.sh/chart: redis-15.7.0
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: replica
 spec:
@@ -2235,9 +2235,9 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: redis
-      app.kubernetes.io/instance: dev
+      app.kubernetes.io/instance: release-name
       app.kubernetes.io/component: replica
-  serviceName: dev-redis-headless
+  serviceName: release-name-redis-headless
   updateStrategy:
     rollingUpdate: {}
     type: RollingUpdate
@@ -2246,19 +2246,19 @@ spec:
       labels:
         app.kubernetes.io/name: redis
         helm.sh/chart: redis-15.7.0
-        app.kubernetes.io/instance: dev
+        app.kubernetes.io/instance: release-name
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/component: replica
       annotations:
-        checksum/configmap: 6f59ae1b4f51d9080664cc1f8327574f837cf2288bdb0e9533b3df7410f21765
-        checksum/health: d930215665ae1d549ef1c2b528948d17c9878f72f9ccbc7dc07c9ed8a1ac2e9d
-        checksum/scripts: 0f3f8a0a581752797259eab3d60c412b6ea70d2e8e0f0ec15c3722451871106c
+        checksum/configmap: c3ee690259a8897caee1994fb60c2db60107121b2dcea68c5478e6b37f5c6856
+        checksum/health: 50819fd188d6a9bbc7a312a5ec19c0141dedcfac202796b79881d81202de41c3
+        checksum/scripts: f4487330e725547d0e8e1d87fb5952cd37d73f372dedab0d0e68ad8a30112586
         checksum/secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     spec:
 
       securityContext:
         fsGroup: 1001
-      serviceAccountName: dev-redis
+      serviceAccountName: release-name-redis
       affinity:
         podAffinity:
 
@@ -2268,7 +2268,7 @@ spec:
                 labelSelector:
                   matchLabels:
                     app.kubernetes.io/name: redis
-                    app.kubernetes.io/instance: dev
+                    app.kubernetes.io/instance: release-name
                     app.kubernetes.io/component: replica
                 namespaces:
                   - "default"
@@ -2294,7 +2294,7 @@ spec:
             - name: REDIS_REPLICATION_MODE
               value: slave
             - name: REDIS_MASTER_HOST
-              value: dev-redis-master-0.dev-redis-headless.default.svc.cluster.local
+              value: release-name-redis-master-0.release-name-redis-headless.default.svc.cluster.local
             - name: REDIS_MASTER_PORT_NUMBER
               value: "6379"
             - name: ALLOW_EMPTY_PASSWORD
@@ -2346,15 +2346,15 @@ spec:
       volumes:
         - name: start-scripts
           configMap:
-            name: dev-redis-scripts
+            name: release-name-redis-scripts
             defaultMode: 0755
         - name: health
           configMap:
-            name: dev-redis-health
+            name: release-name-redis-health
             defaultMode: 0755
         - name: config
           configMap:
-            name: dev-redis-configuration
+            name: release-name-redis-configuration
         - name: redis-tmp-conf
           emptyDir: {}
   volumeClaimTemplates:
@@ -2362,7 +2362,7 @@ spec:
         name: redis-data
         labels:
           app.kubernetes.io/name: redis
-          app.kubernetes.io/instance: dev
+          app.kubernetes.io/instance: release-name
           app.kubernetes.io/component: replica
       spec:
         accessModes:
@@ -2375,11 +2375,11 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sa-final-project-dev
+  name: sa-final-project-release-name
   labels:
     helm.sh/chart: sa-final-project-0.1.0
     app.kubernetes.io/name: sa-final-project
-    app.kubernetes.io/instance: dev
+    app.kubernetes.io/instance: release-name
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
   annotations:
@@ -2395,21 +2395,21 @@ spec:
         paths:
           - backend:
               service:
-                name: auth-svc-dev
+                name: auth-svc-release-name
                 port:
                   number: 80
             path: /api/auth
             pathType: Prefix
           - backend:
               service:
-                name: vehicle-svc-dev
+                name: vehicle-svc-release-name
                 port:
                   number: 80
             path: /api/vehicles
             pathType: Prefix
           - backend:
               service:
-                name: booking-svc-dev
+                name: booking-svc-release-name
                 port:
                   number: 80
             path: /api/bookings
@@ -2417,7 +2417,7 @@ spec:
 
           - backend:
               service:
-                name: zipkin-dev
+                name: zipkin-release-name
                 port:
                   number: 9411
             path: /zipkin
@@ -2425,7 +2425,7 @@ spec:
 
           - backend:
               service:
-                name: email-svc-dev
+                name: email-svc-release-name
                 port:
                   number: 80
             path: /api/notifications
@@ -2433,14 +2433,14 @@ spec:
 
           - backend:
               service:
-                name: review-svc-dev
+                name: review-svc-release-name
                 port:
                   number: 80
             path: /api/reviews
             pathType: Prefix
           - backend:
               service:
-                name: payment-svc-dev
+                name: payment-svc-release-name
                 port:
                   number: 80
             path: /api/payments
